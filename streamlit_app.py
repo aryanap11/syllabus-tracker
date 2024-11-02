@@ -33,16 +33,26 @@ def save_progress(email, completed_topics):
     session = Session()
     try:
         user = session.query(UserProgress).filter_by(email=email).first()
-        # Get all topics that are marked as completed
-        completed_topics_list = [topic for section, topics in completed_topics.items() for topic, completed in zip(topics, completed_topics[section]) if completed]
+        
+        # Flatten completed_topics dictionary into a list of completed topic names
+        completed_topics_list = [
+            topic 
+            for section, topics in completed_topics.items() 
+            for i, completed in enumerate(topics) 
+            if completed 
+            for topic in syllabus[section][i]  # Get the topic name from the syllabus
+        ]
+        
         if user:
             user.completed_topics = ','.join(completed_topics_list)  # Save as comma-separated string
         else:
             user = UserProgress(email=email, completed_topics=','.join(completed_topics_list))
             session.add(user)
+        
         session.commit()
     except Exception as e:
         st.error(f"Error saving progress: {str(e)}")
+
 
 # Syllabus structure
 syllabus = {
@@ -149,12 +159,18 @@ if email:
     for section, topics in syllabus.items():
         with st.expander(section):
             for i, topic in enumerate(topics):
+                # Initialize checkboxes with current completion state
                 if section in completed_topics and len(completed_topics[section]) > i:
-                    if st.checkbox(topic, key=f"{section}_{i}", value=completed_topics[section][i]):
-                        completed_topics[section][i] = True
+                    completed_state = completed_topics[section][i]
+                else:
+                    completed_state = False
+                
+                if st.checkbox(topic, key=f"{section}_{i}", value=completed_state):
+                    completed_topics[section][i] = True
 
     if st.button("Save Progress"):
-        save_progress(email, [topic for section, topics in completed_topics.items() for topic in topics if topic])
+        save_progress(email, completed_topics)  # Pass the completed_topics dictionary directly
         st.success("Progress saved successfully!")
 else:
     st.warning("Please enter your email to track progress.")
+
