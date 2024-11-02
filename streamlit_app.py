@@ -1,25 +1,43 @@
 import streamlit as st
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy import create_engine, Column, Integer, Boolean, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Database setup
+# Set up database
+DATABASE_URL = "sqlite:///syllabus_tracker.db"
+engine = create_engine(DATABASE_URL)
 Base = declarative_base()
-engine = create_engine("sqlite:///syllabus_progress.db")
-Session = sessionmaker(bind=engine)
-db_session = Session()
 
-# Define Progress model
-class Progress(Base):
-    __tablename__ = "progress"
-    id = Column(Integer, primary_key=True)
-    section = Column(String)
-    topic = Column(String)
-    completed = Column(Boolean, default=False)
+class UserProgress(Base):
+    __tablename__ = 'user_progress'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String, unique=True)
+    completed_topics = Column(String)  # Store completed topics as a comma-separated string
 
 Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
 
-# Syllabus structure
+# Function to load user progress from the database
+def load_progress(email):
+    session = Session()
+    user = session.query(UserProgress).filter_by(email=email).first()
+    if user:
+        completed = user.completed_topics.split(',') if user.completed_topics else []
+        return {section: [topic in completed for topic in topics] for section, topics in syllabus.items()}
+    return {section: [False] * len(topics) for section, topics in syllabus.items()}
+
+# Function to save user progress to the database
+def save_progress(email, completed_topics):
+    session = Session()
+    user = session.query(UserProgress).filter_by(email=email).first()
+    if user:
+        user.completed_topics = ','.join(completed_topics)
+    else:
+        user = UserProgress(email=email, completed_topics=','.join(completed_topics))
+        session.add(user)
+    session.commit()
+
+# Syllabus structure with sections and sub-topics
 syllabus = {
     "Probability and Statistics": [
         "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
@@ -43,9 +61,9 @@ syllabus = {
         "Maxima and minima", "Optimization involving a single variable"
     ],
     "Programming, Data Structures and Algorithms": [
-        "Programming in Python", "Stacks", "queues", "linked lists", "trees", "hash tables",
-        "Linear search and binary search", "Selection sort", "Bubble sort", "Insertion sort",
-        "Divide and conquer: mergesort", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals, shortest path"
+        "Programming in Python", "Stacks", "queues", "linked lists", " trees", "hash tables",
+        "Linear search and binary search", "Selection sort", "Bubble sort ", "Insertion sort",
+        "Divide and conquer: mergesort ", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals, shortest path"
     ],
     "Database Management and Warehousing": [
         "ER-model", "Relational model: relational algebra, tuple calculus", "SQL", "Integrity constraints",
@@ -67,7 +85,7 @@ syllabus = {
         "Logic: propositional",
         "Logic: predicate",
         "Reasoning under uncertainty: conditional independence representation",
-        "Exact inference through variable elimination", "approximate inference through sampling."
+        "Exact inference through variable elimination", "approximate inference through sampling. "
     ],
     "General Aptitude (GA)": [
         "VERBAL APTITUDE: 1.1 Basic English Grammar",
@@ -105,55 +123,39 @@ syllabus = {
     ]
 }
 
-# Load progress from the database
-def load_progress():
-    progress_data = {}
-    for section, topics in syllabus.items():
-        progress_data[section] = {}
-        for topic in topics:
-            # Check if topic exists in the database
-            progress = db_session.query(Progress).filter_by(section=section, topic=topic).first()
-            progress_data[section][topic] = progress.completed if progress else False
-    return progress_data
-
-# Save progress to the database
-def save_progress(section, topic, completed):
-    progress = db_session.query(Progress).filter_by(section=section, topic=topic).first()
-    if progress:
-        progress.completed = completed
-    else:
-        progress = Progress(section=section, topic=topic, completed=completed)
-        db_session.add(progress)
-    db_session.commit()
-
-# Initialize session state for progress if not already done
-if "progress_data" not in st.session_state:
-    st.session_state.progress_data = load_progress()
-
-# Display progress on the main page
+# Streamlit app
 st.title("GATE Syllabus Tracker")
-st.write("Mark the topics you've completed, and track your progress in the sidebar.")
+st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
 
-total_topics = sum(len(topics) for topics in syllabus.values())
-completed_topics = 0
+# User email input
+email = st.text_input("Enter your email to track your progress:")
+if email:
+    # Load user progress
+    completed_topics = load_progress(email)
 
-# Sidebar setup with collapsible sections for each subject
-st.sidebar.header("Progress")
-for section, topics in syllabus.items():
-    with st.sidebar.expander(section, expanded=False):  # Each section collapsible by default
-        for topic in topics:
-            # Render each topic as a checkbox and update completion status
-            checked = st.checkbox(topic, value=st.session_state.progress_data[section][topic], key=f"{section}_{topic}")
-            st.session_state.progress_data[section][topic] = checked
-            save_progress(section, topic, checked)  # Save to database
+    # Track total topics and completed topics
+    total_topics = sum(len(topics) for topics in syllabus.values())
+    completed_count = 0
 
-            if checked:
-                completed_topics += 1
+    # Sidebar progress
+    with st.sidebar:
+        st.header("Progress Tracker")
+        progress = (completed_count / total_topics) * 100 if total_topics else 0
+        st.write(f"Overall Progress: {progress:.2f}%")
+        st.progress(progress / 100)
 
-# Progress bar on the main page
-progress_percentage = (completed_topics / total_topics) * 100
-st.write(f"**Overall Progress: {progress_percentage:.2f}% completed**")
-st.progress(progress_percentage / 100)
+    # Render each section with collapsible topics
+    for section, topics in syllabus.items():
+        with st.expander(section):
+            for i, topic in enumerate(topics):
+                # Display checkbox and update state
+                if st.checkbox(topic, key=f"{section}_{i}", value=completed_topics[section][i]):
+                    completed_topics[section][i] = True
 
-# Instructions at the top
-st.write("Use the checkboxes on the sidebar to mark topics as complete. Your progress is saved even if you refresh.")
+    # Save progress on button click
+    if st.button("Save Progress"):
+        save_progress(email, [topic for section, topics in completed_topics.items() for topic in topics if topic])
+        st.success("Progress saved successfully!")
+
+else:
+    st.warning("Please enter your email to track progress.")
