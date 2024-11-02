@@ -2,7 +2,9 @@ import streamlit as st
 
 # Title and introductory text
 st.title("GATE DA Syllabus Tracker")
-st.write("Track your GATE preparation by marking topics as completed.")
+st.write("Mark the topics you completed on the checkbox and track your percentage of completion in the sidebar.")
+
+
 
 # Syllabus structure with collapsible sections
 syllabus = {
