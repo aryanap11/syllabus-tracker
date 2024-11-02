@@ -21,7 +21,7 @@ Base.metadata.create_all(engine)
 # Sample syllabus data (replace with your actual syllabus)
 syllabus = {
     "Probability and Statistics": [
-        "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
+        "Counting (permutation and combinations)", "Probability axioms", "Sample space- events",
         "Independent events", "Mutually exclusive events", "Marginal, conditional and joint probability",
         "Bayes Theorem", "Conditional expectation and variance", "Mean-median-mode and standard deviation",
         "Correlation and covariance", "Random variables", "Discrete random variables and probability mass functions",
