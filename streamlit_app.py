@@ -1,60 +1,24 @@
 import streamlit as st
-from sqlalchemy import create_engine, Column, Integer, Boolean, String
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String
 
-# Set up database
-DATABASE_URL = "sqlite:///syllabus_tracker.db"
-engine = create_engine(DATABASE_URL)
+# Database setup
 Base = declarative_base()
+engine = create_engine('sqlite:///syllabus_tracker.db')
+Session = sessionmaker(bind=engine)
+
 
 class UserProgress(Base):
     __tablename__ = 'user_progress'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String, unique=True)
-    completed_topics = Column(String)  # Store completed topics as a comma-separated string
+    email = Column(String, primary_key=True)
+    completed_topics = Column(String)
+
 
 Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
 
-def load_progress(email):
-    session = Session()
-    try:
-        user = session.query(UserProgress).filter_by(email=email).first()
-        if user:
-            completed = user.completed_topics.split(',') if user.completed_topics else []
-            return {section: [topic in completed for topic in topics] for section, topics in syllabus.items()}
-        return {section: [False] * len(topics) for section, topics in syllabus.items()}
-    except Exception as e:
-        st.error(f"Error loading progress: {str(e)}")
-        return {section: [False] * len(topics) for section, topics in syllabus.items()}
-
-def save_progress(email, completed_topics):
-    session = Session()
-    try:
-        user = session.query(UserProgress).filter_by(email=email).first()
-        
-        # Flatten completed_topics dictionary into a list of completed topic names
-        completed_topics_list = [
-            topic 
-            for section, topics in completed_topics.items() 
-            for i, completed in enumerate(topics) 
-            if completed 
-            for topic in syllabus[section][i]  # Get the topic name from the syllabus
-        ]
-        
-        if user:
-            user.completed_topics = ','.join(completed_topics_list)  # Save as comma-separated string
-        else:
-            user = UserProgress(email=email, completed_topics=','.join(completed_topics_list))
-            session.add(user)
-        
-        session.commit()
-    except Exception as e:
-        st.error(f"Error saving progress: {str(e)}")
-
-
-# Syllabus structure
+# Sample syllabus data (replace with your actual syllabus)
 syllabus = {
     "Probability and Statistics": [
         "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
@@ -139,20 +103,71 @@ syllabus = {
         "4.3 Patterns in 2 and 3 Dimensions"
     ]
 }
+
+
+def save_progress(email, completed_topics):
+    session = Session()
+    try:
+        user = session.query(UserProgress).filter_by(email=email).first()
+
+        # Flatten completed_topics dictionary into a list of completed topic names
+        completed_topics_list = [
+            syllabus[section][i]  # Get the full topic name as a single string
+            for section, topics in completed_topics.items()
+            for i, completed in enumerate(topics)
+            if completed
+        ]
+
+        # Join topics as single strings, not character by character
+        if user:
+            # Save as comma-separated string of full topic names
+            user.completed_topics = ','.join(completed_topics_list)
+        else:
+            user = UserProgress(
+                email=email, completed_topics=','.join(completed_topics_list))
+            session.add(user)
+
+        session.commit()
+    except Exception as e:
+        st.error(f"Error saving progress: {str(e)}")
+
+
+def load_progress(email):
+    session = Session()
+    user = session.query(UserProgress).filter_by(email=email).first()
+    if user:
+        completed_topics = user.completed_topics.split(
+            ',')  # Split into a list
+        completed_dict = {
+            section: [False] * len(topics) for section, topics in syllabus.items()}
+
+        for topic in completed_topics:
+            for section, topics in syllabus.items():
+                if topic in topics:
+                    index = topics.index(topic)
+                    completed_dict[section][index] = True
+
+        return completed_dict
+    else:
+        return {section: [False] * len(topics) for section, topics in syllabus.items()}
+
+
 # Streamlit app
 st.title("GATE Syllabus Tracker")
 st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
 
 # User email input
-email = st.text_input("Enter your email to track your progress:")
+email = st.text_input("Enter your email to track your progress:").strip()
 if email:
     completed_topics = load_progress(email)
 
     total_topics = sum(len(topics) for topics in syllabus.values())
-    completed_count = sum(sum(completed_topics[section]) for section in completed_topics)
+    completed_count = sum(
+        sum(completed_topics[section]) for section in completed_topics)
 
     with st.sidebar:
-        progress = (completed_count / total_topics) * 100 if total_topics else 0
+        progress = (completed_count / total_topics) * \
+            100 if total_topics else 0
         st.write(f"Overall Progress: {progress:.2f}%")
         st.progress(progress / 100)
 
@@ -164,13 +179,13 @@ if email:
                     completed_state = completed_topics[section][i]
                 else:
                     completed_state = False
-                
+
                 if st.checkbox(topic, key=f"{section}_{i}", value=completed_state):
                     completed_topics[section][i] = True
 
     if st.button("Save Progress"):
-        save_progress(email, completed_topics)  # Pass the completed_topics dictionary directly
+        # Pass the completed_topics dictionary directly
+        save_progress(email, completed_topics)
         st.success("Progress saved successfully!")
 else:
     st.warning("Please enter your email to track progress.")
-
