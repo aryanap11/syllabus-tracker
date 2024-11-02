@@ -33,10 +33,12 @@ def save_progress(email, completed_topics):
     session = Session()
     try:
         user = session.query(UserProgress).filter_by(email=email).first()
+        # Get all topics that are marked as completed
+        completed_topics_list = [topic for section, topics in completed_topics.items() for topic, completed in zip(topics, completed_topics[section]) if completed]
         if user:
-            user.completed_topics = ','.join(completed_topics)
+            user.completed_topics = ','.join(completed_topics_list)  # Save as comma-separated string
         else:
-            user = UserProgress(email=email, completed_topics=','.join(completed_topics))
+            user = UserProgress(email=email, completed_topics=','.join(completed_topics_list))
             session.add(user)
         session.commit()
     except Exception as e:
