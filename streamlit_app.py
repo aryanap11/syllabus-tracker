@@ -1,12 +1,25 @@
 import streamlit as st
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-# Title and introductory text
-st.title("GATE DA Syllabus Tracker")
-st.write("Mark the topics you completed on the checkbox and track your percentage of completion in the sidebar.")
+# Database setup
+Base = declarative_base()
+engine = create_engine("sqlite:///syllabus_progress.db")
+Session = sessionmaker(bind=engine)
+db_session = Session()
 
+# Define Progress model
+class Progress(Base):
+    __tablename__ = "progress"
+    id = Column(Integer, primary_key=True)
+    section = Column(String)
+    topic = Column(String)
+    completed = Column(Boolean, default=False)
 
+Base.metadata.create_all(engine)
 
-# Syllabus structure with collapsible sections
+# Syllabus structure
 syllabus = {
     "Probability and Statistics": [
         "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
@@ -92,35 +105,55 @@ syllabus = {
     ]
 }
 
-# Initialize a session state to store completed topics
-if "completed_topics" not in st.session_state:
-    st.session_state.completed_topics = {
-        section: [False] * len(topics) for section, topics in syllabus.items()}
+# Load progress from the database
+def load_progress():
+    progress_data = {}
+    for section, topics in syllabus.items():
+        progress_data[section] = {}
+        for topic in topics:
+            # Check if topic exists in the database
+            progress = db_session.query(Progress).filter_by(section=section, topic=topic).first()
+            progress_data[section][topic] = progress.completed if progress else False
+    return progress_data
 
-# Track total topics and completed topics
+# Save progress to the database
+def save_progress(section, topic, completed):
+    progress = db_session.query(Progress).filter_by(section=section, topic=topic).first()
+    if progress:
+        progress.completed = completed
+    else:
+        progress = Progress(section=section, topic=topic, completed=completed)
+        db_session.add(progress)
+    db_session.commit()
+
+# Initialize session state for progress if not already done
+if "progress_data" not in st.session_state:
+    st.session_state.progress_data = load_progress()
+
+# Display progress on the main page
+st.title("GATE Syllabus Tracker")
+st.write("Mark the topics you've completed, and track your progress in the sidebar.")
+
 total_topics = sum(len(topics) for topics in syllabus.values())
 completed_topics = 0
 
-# Sidebar for progress and subjects
-with st.sidebar:
-    # Calculate completed topics
-    for section, topics in syllabus.items():
-        for i in range(len(topics)):
-            if st.session_state.completed_topics[section][i]:
+# Sidebar setup with collapsible sections for each subject
+st.sidebar.header("Progress")
+for section, topics in syllabus.items():
+    with st.sidebar.expander(section, expanded=False):  # Each section collapsible by default
+        for topic in topics:
+            # Render each topic as a checkbox and update completion status
+            checked = st.checkbox(topic, value=st.session_state.progress_data[section][topic], key=f"{section}_{topic}")
+            st.session_state.progress_data[section][topic] = checked
+            save_progress(section, topic, checked)  # Save to database
+
+            if checked:
                 completed_topics += 1
 
-    # Calculate and display progress
-    progress = (completed_topics / total_topics) * 100
-    st.write(f"**Overall Progress: {progress:.2f}% completed**")
-    st.progress(progress / 100)
+# Progress bar on the main page
+progress_percentage = (completed_topics / total_topics) * 100
+st.write(f"**Overall Progress: {progress_percentage:.2f}% completed**")
+st.progress(progress_percentage / 100)
 
-
-# Main display area
-selected_section = st.session_state.get("selected_section", None)
-st.header("GATE DA Syllabus")
-for section, topics in syllabus.items():
-    with st.expander(section):
-        for i, topic in enumerate(topics):
-            # Display checkbox and update state
-            if st.checkbox(topic, key=f"{section}_{i}"):
-                st.session_state.completed_topics[section][i] = True
+# Instructions at the top
+st.write("Use the checkboxes on the sidebar to mark topics as complete. Your progress is saved even if you refresh.")
