@@ -156,6 +156,7 @@ def load_progress(email):
 st.title("GATE Syllabus Tracker")
 st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
 
+
 # User email input
 email = st.text_input("Enter your email to track your progress:").strip()
 if email:
@@ -165,11 +166,10 @@ if email:
     completed_count = sum(
         sum(completed_topics[section]) for section in completed_topics)
 
-    with st.sidebar:
-        progress = (completed_count / total_topics) * \
-            100 if total_topics else 0
-        st.write(f"Overall Progress: {progress:.2f}%")
-        st.progress(progress / 100)
+    progress = (completed_count / total_topics) * \
+        100 if total_topics else 0
+    st.write(f"Overall Progress: {progress:.2f}%")
+    st.progress(progress / 100)
 
     for section, topics in syllabus.items():
         with st.expander(section):
