@@ -17,27 +17,32 @@ class UserProgress(Base):
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
-# Function to load user progress from the database
 def load_progress(email):
     session = Session()
-    user = session.query(UserProgress).filter_by(email=email).first()
-    if user:
-        completed = user.completed_topics.split(',') if user.completed_topics else []
-        return {section: [topic in completed for topic in topics] for section, topics in syllabus.items()}
-    return {section: [False] * len(topics) for section, topics in syllabus.items()}
+    try:
+        user = session.query(UserProgress).filter_by(email=email).first()
+        if user:
+            completed = user.completed_topics.split(',') if user.completed_topics else []
+            return {section: [topic in completed for topic in topics] for section, topics in syllabus.items()}
+        return {section: [False] * len(topics) for section, topics in syllabus.items()}
+    except Exception as e:
+        st.error(f"Error loading progress: {str(e)}")
+        return {section: [False] * len(topics) for section, topics in syllabus.items()}
 
-# Function to save user progress to the database
 def save_progress(email, completed_topics):
     session = Session()
-    user = session.query(UserProgress).filter_by(email=email).first()
-    if user:
-        user.completed_topics = ','.join(completed_topics)
-    else:
-        user = UserProgress(email=email, completed_topics=','.join(completed_topics))
-        session.add(user)
-    session.commit()
+    try:
+        user = session.query(UserProgress).filter_by(email=email).first()
+        if user:
+            user.completed_topics = ','.join(completed_topics)
+        else:
+            user = UserProgress(email=email, completed_topics=','.join(completed_topics))
+            session.add(user)
+        session.commit()
+    except Exception as e:
+        st.error(f"Error saving progress: {str(e)}")
 
-# Syllabus structure with sections and sub-topics
+# Syllabus structure
 syllabus = {
     "Probability and Statistics": [
         "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
@@ -61,9 +66,9 @@ syllabus = {
         "Maxima and minima", "Optimization involving a single variable"
     ],
     "Programming, Data Structures and Algorithms": [
-        "Programming in Python", "Stacks", "queues", "linked lists", " trees", "hash tables",
-        "Linear search and binary search", "Selection sort", "Bubble sort ", "Insertion sort",
-        "Divide and conquer: mergesort ", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals, shortest path"
+        "Programming in Python", "Stacks", "queues", "linked lists", "trees", "hash tables",
+        "Linear search and binary search", "Selection sort", "Bubble sort", "Insertion sort",
+        "Divide and conquer: mergesort", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals, shortest path"
     ],
     "Database Management and Warehousing": [
         "ER-model", "Relational model: relational algebra, tuple calculus", "SQL", "Integrity constraints",
@@ -85,7 +90,7 @@ syllabus = {
         "Logic: propositional",
         "Logic: predicate",
         "Reasoning under uncertainty: conditional independence representation",
-        "Exact inference through variable elimination", "approximate inference through sampling. "
+        "Exact inference through variable elimination", "approximate inference through sampling."
     ],
     "General Aptitude (GA)": [
         "VERBAL APTITUDE: 1.1 Basic English Grammar",
@@ -122,7 +127,6 @@ syllabus = {
         "4.3 Patterns in 2 and 3 Dimensions"
     ]
 }
-
 # Streamlit app
 st.title("GATE Syllabus Tracker")
 st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
@@ -130,32 +134,25 @@ st.write("Mark the topics you completed on the check box and track your percenta
 # User email input
 email = st.text_input("Enter your email to track your progress:")
 if email:
-    # Load user progress
     completed_topics = load_progress(email)
 
-    # Track total topics and completed topics
     total_topics = sum(len(topics) for topics in syllabus.values())
-    completed_count = 0
+    completed_count = sum(sum(completed_topics[section]) for section in completed_topics)
 
-    # Sidebar progress
     with st.sidebar:
-        st.header("Progress Tracker")
         progress = (completed_count / total_topics) * 100 if total_topics else 0
         st.write(f"Overall Progress: {progress:.2f}%")
         st.progress(progress / 100)
 
-    # Render each section with collapsible topics
     for section, topics in syllabus.items():
         with st.expander(section):
             for i, topic in enumerate(topics):
-                # Display checkbox and update state
-                if st.checkbox(topic, key=f"{section}_{i}", value=completed_topics[section][i]):
-                    completed_topics[section][i] = True
+                if section in completed_topics and len(completed_topics[section]) > i:
+                    if st.checkbox(topic, key=f"{section}_{i}", value=completed_topics[section][i]):
+                        completed_topics[section][i] = True
 
-    # Save progress on button click
     if st.button("Save Progress"):
         save_progress(email, [topic for section, topics in completed_topics.items() for topic in topics if topic])
         st.success("Progress saved successfully!")
-
 else:
     st.warning("Please enter your email to track progress.")
