@@ -270,7 +270,6 @@ def main_app():
     else:
         st.warning("Please enter your email to track progress.")
 
-
 def main():
     with st.sidebar:
         selected_page = option_menu("Navigation", ["Syllabus Tracker", "Thank Me here"],
@@ -283,7 +282,6 @@ def main():
         main_app()
     elif selected_page == "Thank Me here":
         show_feedback()
-
 
 if __name__ == "__main__":
     main()
