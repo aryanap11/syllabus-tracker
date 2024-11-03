@@ -236,11 +236,14 @@ def load_progress(email):
 def main_app():
     # Streamlit app
     st.title("GATE Syllabus Tracker 📝")
-    st.markdown("To track your GATE syllabus:<br> 1. Enter Email: as your Unique identifier.<br> 2. Mark Topics &  Click 'Save Progress'.<br> 3. Refresh & Re-enter email to load progress.", unsafe_allow_html=True)
-
-    st.write(" Open the sidebar and connect with me!")
+    st.markdown("<br>"
+                "- Enter Email: as your Unique identifier.<br>"
+                "- Mark Topics &  Click 'Save Progress'.<br>"
+                "- Refresh & Re-enter email to load progress.<br>"
+                "- Open the sidebar and connect with me!", unsafe_allow_html=True)
 
     # User email input
+    st.markdown("<br>", unsafe_allow_html=True)
     email = st.text_input("➡️Enter your email to track your progress:").strip()
     if email:
         completed_topics = load_progress(email)
