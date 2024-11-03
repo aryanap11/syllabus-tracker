@@ -3,6 +3,85 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String
+from streamlit_option_menu import option_menu
+
+
+# Configure Streamlit page
+st.set_page_config(
+    page_title="Syllabus Tracker",
+    page_icon="📝",
+    layout="wide",
+)
+
+
+def show_feedback():
+    st.write("🔗 Connect with me on:")
+    st.markdown(
+        "[LinkedIn](https://www.linkedin.com/in/aryanpatel11) | [GitHub](https://github.com/aryanap11)")
+
+    st.title("Thank Me Here 😁")
+    st.write("🎉 Hey there, I'm Aryan! I made this app just for you all! If you enjoyed it, feel free to thank me or share your thoughts below! 😊💬")
+
+    # Embed Google Form using Markdown
+    st.markdown(
+        """<style>
+    /* Container */
+    .form-container {
+        max-width: 400px;
+        margin: 0;
+    }
+
+    /* Labels */
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    /* Input fields and textarea */
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* Button */
+    button[type="submit"] {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<div class="form-container">
+<form action="https://submit-form.com/IzNJLEA6n">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Name" required="" />
+        <label for="message">Your Message</label>
+        <textarea
+            id="message"
+            name="message"
+            placeholder="Message"
+            required=""
+        ></textarea>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+        """, unsafe_allow_html=True)
+
 
 # Database setup
 Base = declarative_base()
@@ -21,14 +100,14 @@ Base.metadata.create_all(engine)
 # Sample syllabus data (replace with your actual syllabus)
 syllabus = {
     "Probability and Statistics": [
-        "Counting (permutation and combinations)", "Probability axioms", "Sample space-events",
-        "Independent events", "Mutually exclusive events", "Marginal-conditional-joint probability",
-        "Bayes Theorem", "Conditional expectation and variance", "Mean-median-mode and standard deviation",
+        "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
+        "Independent events", "Mutually exclusive events", "Marginal, conditional and joint probability",
+        "Bayes Theorem", "Conditional expectation and variance", "Mean, median, mode, and standard deviation",
         "Correlation and covariance", "Random variables", "Discrete random variables and probability mass functions",
-        "Uniform-Bernoulli-binomial distribution", "Continuous random variables and probability distribution function",
-        "Uniform-exponential-Poisson", "Normal standard normal", "t-distribution-chi-squared distributions",
+        "Uniform, Bernoulli, binomial distribution", "Continuous random variables and probability distribution function",
+        "Uniform, exponential, Poisson", "Normal, standard normal", "t-distribution, chi-squared distributions",
         "Cumulative distribution function", "Conditional PDF", "Central limit theorem", "Confidence interval",
-        "z-test-t-test-chi-squared test"
+        "z-test, t-test, chi-squared test"
     ],
     "Linear Algebra": [
         "Vector space", "Subspaces", "Linear dependence and independence of vectors", "Matrices",
@@ -44,18 +123,18 @@ syllabus = {
     "Programming, Data Structures and Algorithms": [
         "Programming in Python", "Stacks", "queues", "linked lists", "trees", "hash tables",
         "Linear search and binary search", "Selection sort", "Bubble sort", "Insertion sort",
-        "Divide and conquer: mergesort", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals-shortest path"
+        "Divide and conquer: mergesort", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals, shortest path"
     ],
     "Database Management and Warehousing": [
-        "ER-model", "Relational model: relational algebra-tuple calculus", "SQL", "Integrity constraints",
-        "Normal form", "File organization", "Indexing", "Data types", "Data transformation: normalization-discretization-sampling-compression",
+        "ER-model", "Relational model: relational algebra, tuple calculus", "SQL", "Integrity constraints",
+        "Normal form", "File organization", "Indexing", "Data types", "Data transformation: normalization, discretization, sampling, compression",
         "Data warehouse modelling: schema for multidimensional data models", "Concept hierarchies", "Measures: categorization and computations"
     ],
     "Machine Learning": [
         "Supervised Learning: Simple linear regression", "Multiple linear regression",
         "Ridge regression", "Classification: Logistic regression", "K-nearest neighbour", "Naive Bayes classifier",
         "Linear discriminant analysis", "Support vector machine", "Decision trees", "Bias-variance trade-off",
-        "Cross-validation: leave-one-out-k-folds", "Multi-layer perceptron", "Feed-forward neural network",
+        "Cross-validation: leave-one-out, k-folds", "Multi-layer perceptron", "Feed-forward neural network",
         "Unsupervised Learning: clustering algorithms", "K-means/k-medoid", "Hierarchical clustering",
         "Dimensionality reduction: PCA"
     ],
@@ -153,39 +232,53 @@ def load_progress(email):
 
 
 # Streamlit app
-st.title("GATE Syllabus Tracker")
-st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
+# Main app function
+def main_app():
+    # Streamlit app
+    st.title("GATE Syllabus Tracker")
+    st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
+
+    # User email input
+    email = st.text_input("Enter your email to track your progress:").strip()
+    if email:
+        completed_topics = load_progress(email)
+
+        total_topics = sum(len(topics) for topics in syllabus.values())
+        completed_count = sum(
+            sum(completed_topics[section]) for section in completed_topics)
+
+        progress = (completed_count / total_topics) * \
+            100 if total_topics else 0
+        st.write(f"Overall Progress: {progress:.2f}%")
+        st.progress(progress / 100)
+
+        for section, topics in syllabus.items():
+            with st.expander(section):
+                for i, topic in enumerate(topics):
+                    # Initialize checkboxes with current completion state
+                    if section in completed_topics and len(completed_topics[section]) > i:
+                        completed_state = completed_topics[section][i]
+                    else:
+                        completed_state = False
+
+                    if st.checkbox(topic, key=f"{section}_{i}", value=completed_state):
+                        completed_topics[section][i] = True
+
+        if st.button("Save Progress"):
+            save_progress(email, completed_topics)
+            st.success("Progress saved successfully!")
+    else:
+        st.warning("Please enter your email to track progress.")
 
 
-# User email input
-email = st.text_input("Enter your email to track your progress:").strip()
-if email:
-    completed_topics = load_progress(email)
+with st.sidebar:
+    selected_page = option_menu("Navigation", ["Syllabus Tracker", "Thank Me here"],
+                                icons=['list-task', 'chat-left-text'],
+                                menu_icon="cast", default_index=0, orientation="vertical")
+    selected_page
 
-    total_topics = sum(len(topics) for topics in syllabus.values())
-    completed_count = sum(
-        sum(completed_topics[section]) for section in completed_topics)
-
-    progress = (completed_count / total_topics) * \
-        100 if total_topics else 0
-    st.write(f"Overall Progress: {progress:.2f}%")
-    st.progress(progress / 100)
-
-    for section, topics in syllabus.items():
-        with st.expander(section):
-            for i, topic in enumerate(topics):
-                # Initialize checkboxes with current completion state
-                if section in completed_topics and len(completed_topics[section]) > i:
-                    completed_state = completed_topics[section][i]
-                else:
-                    completed_state = False
-
-                if st.checkbox(topic, key=f"{section}_{i}", value=completed_state):
-                    completed_topics[section][i] = True
-
-    if st.button("Save Progress"):
-        # Pass the completed_topics dictionary directly
-        save_progress(email, completed_topics)
-        st.success("Progress saved successfully!")
-else:
-    st.warning("Please enter your email to track progress.")
+# Navigation logic
+if selected_page == "Syllabus Tracker":
+    main_app()
+elif selected_page == "Thank Me here":
+    show_feedback()
