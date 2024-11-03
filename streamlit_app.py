@@ -271,14 +271,19 @@ def main_app():
         st.warning("Please enter your email to track progress.")
 
 
-with st.sidebar:
-    selected_page = option_menu("Navigation", ["Syllabus Tracker", "Thank Me here"],
+def main():
+    with st.sidebar:
+        selected_page = option_menu("Navigation", ["Syllabus Tracker", "Thank Me here"],
                                 icons=['list-task', 'chat-left-text'],
                                 menu_icon="cast", default_index=0, orientation="vertical")
-    selected_page
+        selected_page
 
 # Navigation logic
-if selected_page == "Syllabus Tracker":
-    main_app()
-elif selected_page == "Thank Me here":
-    show_feedback()
+    if selected_page == "Syllabus Tracker":
+        main_app()
+    elif selected_page == "Thank Me here":
+        show_feedback()
+
+
+if __name__ == "__main__":
+    main()
