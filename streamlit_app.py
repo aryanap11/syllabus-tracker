@@ -100,14 +100,14 @@ Base.metadata.create_all(engine)
 # Sample syllabus data (replace with your actual syllabus)
 syllabus = {
     "Probability and Statistics": [
-        "Counting (permutation and combinations)", "Probability axioms", "Sample space, events",
-        "Independent events", "Mutually exclusive events", "Marginal, conditional and joint probability",
-        "Bayes Theorem", "Conditional expectation and variance", "Mean, median, mode, and standard deviation",
+        "Counting (permutation and combinations)", "Probability axioms", "Sample space-events",
+        "Independent events", "Mutually exclusive events", "Marginal-conditional and joint probability",
+        "Bayes Theorem", "Conditional expectation and variance", "Mean-median-mode and standard deviation",
         "Correlation and covariance", "Random variables", "Discrete random variables and probability mass functions",
-        "Uniform, Bernoulli, binomial distribution", "Continuous random variables and probability distribution function",
-        "Uniform, exponential, Poisson", "Normal, standard normal", "t-distribution, chi-squared distributions",
+        "Uniform-Bernoulli-binomial distribution", "Continuous random variables and probability distribution function",
+        "Uniform-exponential-Poisson", "Normal-standard normal", "t-distribution-chi-squared distributions",
         "Cumulative distribution function", "Conditional PDF", "Central limit theorem", "Confidence interval",
-        "z-test, t-test, chi-squared test"
+        "z-test-t-test-chi-squared test"
     ],
     "Linear Algebra": [
         "Vector space", "Subspaces", "Linear dependence and independence of vectors", "Matrices",
@@ -123,18 +123,18 @@ syllabus = {
     "Programming, Data Structures and Algorithms": [
         "Programming in Python", "Stacks", "queues", "linked lists", "trees", "hash tables",
         "Linear search and binary search", "Selection sort", "Bubble sort", "Insertion sort",
-        "Divide and conquer: mergesort", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals, shortest path"
+        "Divide and conquer: mergesort", "Divide and conquer: quicksort", "Introduction to graph theory", "Graph algorithms: traversals-shortest path"
     ],
     "Database Management and Warehousing": [
-        "ER-model", "Relational model: relational algebra, tuple calculus", "SQL", "Integrity constraints",
-        "Normal form", "File organization", "Indexing", "Data types", "Data transformation: normalization, discretization, sampling, compression",
+        "ER-model", "Relational model: relational algebra-tuple calculus", "SQL", "Integrity constraints",
+        "Normal form", "File organization", "Indexing", "Data types", "Data transformation: normalization,-discretization-sampling-compression",
         "Data warehouse modelling: schema for multidimensional data models", "Concept hierarchies", "Measures: categorization and computations"
     ],
     "Machine Learning": [
         "Supervised Learning: Simple linear regression", "Multiple linear regression",
         "Ridge regression", "Classification: Logistic regression", "K-nearest neighbour", "Naive Bayes classifier",
         "Linear discriminant analysis", "Support vector machine", "Decision trees", "Bias-variance trade-off",
-        "Cross-validation: leave-one-out, k-folds", "Multi-layer perceptron", "Feed-forward neural network",
+        "Cross-validation: leave-one-out-k-folds", "Multi-layer perceptron", "Feed-forward neural network",
         "Unsupervised Learning: clustering algorithms", "K-means/k-medoid", "Hierarchical clustering",
         "Dimensionality reduction: PCA"
     ],
