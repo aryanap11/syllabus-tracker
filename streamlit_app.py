@@ -277,15 +277,15 @@ def main_app():
 
 def main():
     with st.sidebar:
-        selected_page = option_menu("Navigation", ["Syllabus Tracker", "Thank Me here"],
-                                icons=['list-task', 'chat-left-text'],
+        selected_page = option_menu("Navigation", ["Syllabus Tracker", "Connect with me"],
+                                icons=['list-task', 'person-lines-fill'],
                                 menu_icon="cast", default_index=0, orientation="vertical")
         selected_page
 
 # Navigation logic
     if selected_page == "Syllabus Tracker":
         main_app()
-    elif selected_page == "Thank Me here":
+    elif selected_page == "Connect with me":
         show_feedback()
 
 if __name__ == "__main__":
