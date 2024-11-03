@@ -66,7 +66,7 @@ def show_feedback():
 </style>
 
 <div class="form-container">
-<form action="https://submit-form.com/IzNJLEA6n">
+<form action="https://submit-form.com/6Gh4t63hK">
         <label for="name">Your Name</label>
         <input type="text" id="name" name="name" placeholder="Name" required="" />
         <label for="message">Your Message</label>
