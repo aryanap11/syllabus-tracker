@@ -235,11 +235,13 @@ def load_progress(email):
 # Main app function
 def main_app():
     # Streamlit app
-    st.title("GATE Syllabus Tracker")
-    st.write("Mark the topics you completed on the check box and track your percentage of completion on the sidebar.")
+    st.title("GATE Syllabus Tracker 📝")
+    st.markdown("To track your GATE syllabus:<br> 1. Enter Email: as your Unique identifier.<br> 2. Mark Topics &  Click 'Save Progress'.<br> 3. Refresh & Re-enter email to load progress.", unsafe_allow_html=True)
+
+    st.write(" Open the sidebar and connect with me!")
 
     # User email input
-    email = st.text_input("Enter your email to track your progress:").strip()
+    email = st.text_input("➡️Enter your email to track your progress:").strip()
     if email:
         completed_topics = load_progress(email)
 
