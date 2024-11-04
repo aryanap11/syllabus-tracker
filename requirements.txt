@@ -5,4 +5,4 @@ pdf2image
 opencv-python-headless
 numpy
 Pillow
-
+python-poppler
