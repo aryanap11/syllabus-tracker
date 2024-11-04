@@ -1,3 +1,8 @@
 streamlit
 sqlalchemy
 streamlit-option-menu
+pdf2image
+opencv-python-headless
+numpy
+Pillow
+
