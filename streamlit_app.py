@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String
 from streamlit_option_menu import option_menu
-import pandas as pd
 
 
 
@@ -14,17 +13,6 @@ st.set_page_config(
     page_icon="📝",
     layout="wide",
 )
-def export_data_to_csv():
-    session = Session()
-    try:
-        data = session.query(UserProgress).all()
-        data_list = [{"email": user.email, "completed_topics": user.completed_topics} for user in data]
-        df = pd.DataFrame(data_list)
-        csv_data = df.to_csv(index=False).encode('utf-8')
-        return csv_data
-    except Exception as e:
-        st.error(f"Error exporting data: {str(e)}")
-        return None
 
 def show_feedback():
     st.write("🔗 Connect with me on:")
@@ -33,14 +21,7 @@ def show_feedback():
 
     st.title("Thank Me Here 😁")
     st.write("🎉 Hey there, I'm Aryan! I made this app just for you all! If you enjoyed it, feel free to thank me or share your thoughts below! 😊💬")
-    csv_data = export_data_to_csv()
-    if csv_data:
-        st.download_button(
-                label="📥 Download User Progress Data",
-                data=csv_data,
-                file_name="user_progress_data.csv",
-                mime="text/csv"
-            )
+
     # Embed Google Form using Markdown
     st.markdown(
         """<style>
