@@ -32,8 +32,8 @@ def show_feedback():
     st.title("Thank Me Here 😁")
     st.write("🎉 Hey there, I'm Aryan! I made this app just for you all! If you enjoyed it, feel free to thank me or share your thoughts below! 😊💬")
     csv_data = export_data_to_csv()
-        if csv_data:
-            st.download_button(
+    if csv_data:
+        st.download_button(
                 label="📥 Download User Progress Data",
                 data=csv_data,
                 file_name="user_progress_data.csv",
