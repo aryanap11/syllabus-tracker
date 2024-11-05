@@ -4,6 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String
 from streamlit_option_menu import option_menu
+import pandas as pd
+
 
 
 # Configure Streamlit page
