@@ -4,6 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String
 from streamlit_option_menu import option_menu
+import pandas as pd
+
 
 
 
@@ -230,6 +232,21 @@ def load_progress(email):
         return completed_dict
     else:
         return {section: [False] * len(topics) for section, topics in syllabus.items()}
+
+def download_database():
+    # Query all data from the database
+    session = Session()
+    data = session.query(UserProgress).all()
+    session.close()
+
+    # Convert data to a DataFrame
+    data_dict = {"email": [record.email for record in data],
+                 "completed_topics": [record.completed_topics for record in data]}
+    df = pd.DataFrame(data_dict)
+
+    # Convert DataFrame to CSV and download
+    csv = df.to_csv(index=False)
+    st.download_button(label="📥 Download Database as CSV", data=csv, file_name='syllabus_tracker_data.csv', mime='text/csv')
 
 
 # Streamlit app
