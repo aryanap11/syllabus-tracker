@@ -19,15 +19,6 @@ def show_feedback():
     st.markdown(
         "[LinkedIn](https://www.linkedin.com/in/aryanpatel11) | [GitHub](https://github.com/aryanap11)")
 
-    st.markdown("### Download Database")
-    if st.button("Download as CSV"):
-        df = download_database()
-        st.download_button(
-            label="Download Database CSV",
-            data=df.to_csv(index=False),
-            file_name="syllabus_tracker_data.csv",
-            mime="text/csv"
-        )
     
     st.title("Thank Me Here 😁")
     st.write("🎉 Hey there, I'm Aryan! I made this app just for you all! If you enjoyed it, feel free to thank me or share your thoughts below! 😊💬")
