@@ -20,7 +20,6 @@ def show_feedback():
     st.write("🔗 Connect with me on:")
     st.markdown(
         "[LinkedIn](https://www.linkedin.com/in/aryanpatel11) | [GitHub](https://github.com/aryanap11)")
-    download_database()
 
     
     st.title("Thank Me Here 😁")
@@ -233,21 +232,6 @@ def load_progress(email):
         return completed_dict
     else:
         return {section: [False] * len(topics) for section, topics in syllabus.items()}
-
-def download_database():
-    # Query all data from the database
-    session = Session()
-    data = session.query(UserProgress).all()
-    session.close()
-
-    # Convert data to a DataFrame
-    data_dict = {"email": [record.email for record in data],
-                 "completed_topics": [record.completed_topics for record in data]}
-    df = pd.DataFrame(data_dict)
-
-    # Convert DataFrame to CSV and download
-    csv = df.to_csv(index=False)
-    st.download_button(label="📥 Download Database as CSV", data=csv, file_name='syllabus_tracker_data.csv', mime='text/csv')
 
 
 # Streamlit app
