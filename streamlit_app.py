@@ -20,6 +20,7 @@ def show_feedback():
     st.write("🔗 Connect with me on:")
     st.markdown(
         "[LinkedIn](https://www.linkedin.com/in/aryanpatel11) | [GitHub](https://github.com/aryanap11)")
+    download_database()
 
     
     st.title("Thank Me Here 😁")
